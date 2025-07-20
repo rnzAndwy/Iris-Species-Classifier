@@ -1,0 +1,496 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Iris Predictor - AI Flower Classification</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary-purple: #7C3AED;
+      --secondary-purple: #A855F7;
+      --light-purple: #C4B5FD;
+      --accent-blue: #6366F1;
+      --bg-primary: #FAFAFF;
+      --bg-secondary: #F8FAFF;
+      --bg-card: #FFFFFF;
+      --text-primary: #1F2937;
+      --text-secondary: #6B7280;
+      --text-muted: #9CA3AF;
+      --border-light: #E5E7EB;
+      --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+      --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+      --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+      --gradient-primary: linear-gradient(135deg, #7C3AED 0%, #A855F7 100%);
+      --gradient-bg: linear-gradient(135deg, #FAFAFF 0%, #F3F4F6 100%);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--gradient-bg);
+      color: var(--text-primary);
+      line-height: 1.6;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 480px;
+      margin: 0 auto;
+    }
+
+    .app-card {
+      background: var(--bg-card);
+      border-radius: 24px;
+      box-shadow: var(--shadow-lg);
+      padding: 40px;
+      border: 1px solid var(--border-light);
+      backdrop-filter: blur(10px);
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+
+    .logo {
+      width: 64px;
+      height: 64px;
+      margin: 0 auto 16px;
+      background: var(--gradient-primary);
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: var(--shadow-md);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .logo::before {
+      content: '🌸';
+      font-size: 28px;
+      filter: grayscale(1) brightness(0) invert(1);
+    }
+
+    .logo::after {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
+      transform: rotate(45deg);
+      animation: shimmer 3s ease-in-out infinite;
+    }
+
+    @keyframes shimmer {
+      0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+      50% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+      100% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+    }
+
+    h1 {
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 8px;
+      background: var(--gradient-primary);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .subtitle {
+      color: var(--text-secondary);
+      font-size: 16px;
+      font-weight: 400;
+      margin-bottom: 32px;
+    }
+
+    .input-group {
+      margin-bottom: 24px;
+    }
+
+    .input-label {
+      display: block;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-primary);
+      margin-bottom: 8px;
+    }
+
+    .input-description {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-bottom: 12px;
+      line-height: 1.4;
+    }
+
+    .input-wrapper {
+      position: relative;
+    }
+
+    #features {
+      width: 100%;
+      padding: 16px 20px;
+      font-size: 16px;
+      border: 2px solid var(--border-light);
+      border-radius: 16px;
+      background: var(--bg-secondary);
+      color: var(--text-primary);
+      outline: none;
+      transition: all 0.2s ease;
+      font-family: inherit;
+    }
+
+    #features:focus {
+      border-color: var(--primary-purple);
+      background: var(--bg-card);
+      box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.1);
+    }
+
+    #features::placeholder {
+      color: var(--text-muted);
+    }
+
+    .pred_btn {
+      width: 100%;
+      padding: 16px 24px;
+      font-size: 16px;
+      font-weight: 600;
+      color: white;
+      background: var(--gradient-primary);
+      border: none;
+      border-radius: 16px;
+      cursor: pointer;
+      outline: none;
+      transition: all 0.2s ease;
+      position: relative;
+      overflow: hidden;
+      margin-bottom: 24px;
+      font-family: inherit;
+    }
+
+    .pred_btn:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .pred_btn:active {
+      transform: translateY(0);
+    }
+
+    .pred_btn:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .loading {
+      display: none;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .spinner {
+      width: 20px;
+      height: 20px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      border-top-color: white;
+      animation: spin 1s ease-in-out infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .result-card {
+      background: var(--bg-secondary);
+      border-radius: 16px;
+      padding: 20px;
+      text-align: center;
+      border: 1px solid var(--border-light);
+      min-height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s ease;
+    }
+
+    .result-card.has-result {
+      background: linear-gradient(135deg, #F3E8FF 0%, #EDE9FE 100%);
+      border-color: var(--light-purple);
+    }
+
+    #result {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin: 0;
+    }
+
+    .result-empty {
+      color: var(--text-muted);
+      font-size: 14px;
+      font-weight: 400;
+    }
+
+    .species-badge {
+      display: inline-block;
+      padding: 8px 16px;
+      background: var(--gradient-primary);
+      color: white;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 600;
+      margin-top: 8px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .error-message {
+      color: #DC2626;
+      background: #FEF2F2;
+      border: 1px solid #FECACA;
+      border-radius: 12px;
+      padding: 12px 16px;
+      font-size: 14px;
+      margin-top: 16px;
+    }
+
+    .footer {
+      text-align: center;
+      margin-top: 24px;
+      padding-top: 24px;
+      border-top: 1px solid var(--border-light);
+    }
+
+    .footer-text {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    /* Responsive Design */
+    @media (max-width: 640px) {
+      .app-card {
+        padding: 24px;
+        margin: 16px;
+        border-radius: 20px;
+      }
+
+      h1 {
+        font-size: 24px;
+      }
+
+      .logo {
+        width: 56px;
+        height: 56px;
+      }
+
+      .logo::before {
+        font-size: 24px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      body {
+        padding: 12px;
+      }
+
+      .app-card {
+        padding: 20px;
+      }
+
+      h1 {
+        font-size: 22px;
+      }
+
+      #features, .pred_btn {
+        font-size: 15px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="app-card">
+      <div class="header">
+        <div class="logo"></div>
+        <h1>Iris Classifier</h1>
+        <p class="subtitle">AI-powered flower species identification</p>
+      </div>
+
+      <div class="input-group">
+        <label class="input-label" for="features">Flower Measurements</label>
+        <p class="input-description">Enter the measurements separated by commas: Sepal Length, Sepal Width, Petal Length, Petal Width (in cm)</p>
+        <div class="input-wrapper">
+          <input type="text" id="features" placeholder="e.g., 5.1, 3.5, 1.4, 0.2">
+        </div>
+      </div>
+
+      <button class="pred_btn" onclick="getPrediction()">
+        <span class="button-text">Classify Iris Species</span>
+        <div class="loading">
+          <div class="spinner"></div>
+          <span>Analyzing...</span>
+        </div>
+      </button>
+
+      <div class="result-card" id="result-card">
+        <p id="result" class="result-empty">Enter measurements above to get started</p>
+      </div>
+
+      <div class="footer">
+        <p class="footer-text">Powered by Machine Learning • Built with ❤️</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function getPrediction() {
+      const input = document.getElementById("features").value.trim();
+      const button = document.querySelector(".pred_btn");
+      const buttonText = button.querySelector(".button-text");
+      const loading = button.querySelector(".loading");
+      const resultElement = document.getElementById("result");
+      const resultCard = document.getElementById("result-card");
+      
+      // Clear any previous error messages
+      const existingError = document.querySelector(".error-message");
+      if (existingError) {
+        existingError.remove();
+      }
+
+      // Validate input
+      if (!input) {
+        showError("Please enter flower measurements");
+        return;
+      }
+
+      const values = input.split(',').map(val => {
+        const num = parseFloat(val.trim());
+        return isNaN(num) ? null : num;
+      });
+
+      if (values.length !== 4 || values.some(val => val === null)) {
+        showError("Please enter exactly 4 numeric values separated by commas");
+        return;
+      }
+
+      // Show loading state
+      button.disabled = true;
+      buttonText.style.display = 'none';
+      loading.style.display = 'flex';
+      resultElement.textContent = "Processing your request...";
+      resultElement.className = "result-empty";
+      resultCard.classList.remove("has-result");
+
+      fetch('http://localhost:5000/model_prediction', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ features: values })
+      })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error(`Server error: ${response.status}`);
+        }
+        return response.json();
+      })
+      .then(data => {
+        // Hide loading state
+        button.disabled = false;
+        buttonText.style.display = 'inline';
+        loading.style.display = 'none';
+        
+        // Display result with enhanced styling
+        const prediction = data.prediction;
+        const speciesEmoji = getSpeciesEmoji(prediction);
+        
+        resultElement.innerHTML = `
+          <div>Predicted Species:</div>
+          <div class="species-badge">${speciesEmoji} ${prediction}</div>
+        `;
+        resultElement.className = "";
+        resultCard.classList.add("has-result");
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        
+        // Hide loading state
+        button.disabled = false;
+        buttonText.style.display = 'inline';
+        loading.style.display = 'none';
+        
+        // Show error
+        showError("Failed to get prediction. Please check if the server is running.");
+        resultElement.textContent = "Enter measurements above to get started";
+        resultElement.className = "result-empty";
+        resultCard.classList.remove("has-result");
+      });
+    }
+
+    function showError(message) {
+      const existingError = document.querySelector(".error-message");
+      if (existingError) {
+        existingError.remove();
+      }
+      
+      const errorDiv = document.createElement("div");
+      errorDiv.className = "error-message";
+      errorDiv.textContent = message;
+      
+      const resultCard = document.getElementById("result-card");
+      resultCard.insertAdjacentElement('afterend', errorDiv);
+    }
+
+    function getSpeciesEmoji(species) {
+      const speciesMap = {
+        'setosa': '🌸',
+        'versicolor': '🌺', 
+        'virginica': '🌻'
+      };
+      
+      const lowerSpecies = species.toLowerCase();
+      for (const [key, emoji] of Object.entries(speciesMap)) {
+        if (lowerSpecies.includes(key)) {
+          return emoji;
+        }
+      }
+      return '🌸'; // default
+    }
+
+    // Allow Enter key to submit
+    document.getElementById("features").addEventListener("keypress", function(event) {
+      if (event.key === "Enter") {
+        getPrediction();
+      }
+    });
+
+    // Auto-format input as user types
+    document.getElementById("features").addEventListener("input", function(event) {
+      let value = event.target.value;
+      // Remove extra spaces around commas
+      value = value.replace(/\s*,\s*/g, ', ');
+      event.target.value = value;
+    });
+  </script>
+</body>
+</html>
